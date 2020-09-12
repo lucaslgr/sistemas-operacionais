@@ -1,29 +1,28 @@
+/**! INSTRUÇÕES
+*! Para compilar:
+*!  - gcc -o test fatorial-bignum-thread.c -lpthread
+*! Para executar:
+*!  - ./test <VALUE>
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "./lib/bignum.c"
 #include<pthread.h> //para criar threads
+#include "./lib/bignum.c"
 
 //* Estrutura que armazena os fornece e armazena os dados de cada thread
 struct data_task {
     int *p_offsets;
     int indicator_part;
-    // bignum partial_result;
-    int partial_result;
+    bignum partial_result;
+    // int partial_result;
 };
 
 //*Tarefa executada por cada thread
 void* task_thread(void *task_dt){
     struct data_task * p_data_task = (struct data_task *) task_dt;
 
-    //bignum bignum_n;
-    //convertendo de inteiro para bignum
-    //int_to_bignum
-    //    (p_data_task->offset* p_data_task->indicator_part,
-    //    &bignum_n
-    //);
-
-    p_data_task->partial_result = 1;
-    // int_to_bignum(1, p_data_task->partial_result);
+    int_to_bignum(1, &p_data_task->partial_result);
 
     //Calculando os limites superiores e inferiores
     int upper_limit = p_data_task->p_offsets[p_data_task->indicator_part];
@@ -44,13 +43,21 @@ void* task_thread(void *task_dt){
 
     for (int i = upper_limit; i > inferior_limit; i--)
     {
-        p_data_task->partial_result = p_data_task->partial_result * i;
+        bignum iterator;
+        int_to_bignum(i, &iterator);
+
+        bignum product;
+        multiply_bignum(&p_data_task->partial_result, &iterator, &product);
+
+        p_data_task->partial_result = product;
     }
 
     printf(
-        "Resultado parcial do fatorial pela thread %d : %d \n\n\r\r",
-        p_data_task->indicator_part, p_data_task->partial_result
+        "Resultado parcial do fatorial pela thread %d : ",
+        p_data_task->indicator_part
     );
+    print_bignum(&p_data_task->partial_result);
+    printf("\n\n\r\r");
 }
 
 //Identifica o fatorial e separa em 3 para ser calculado por cada thread
@@ -86,6 +93,14 @@ void solve_if_small_number(int *num){
         exit;
         return;
     }
+}
+
+
+//Multiplica todos os resultados parciais do fatorial
+void join_partial_results(bignum *a, bignum *b, bignum *c, bignum *final_result){
+    bignum partial_result;
+    multiply_bignum(a, b, &partial_result);
+    multiply_bignum(&partial_result, c, final_result);
 }
 
 //!OBS: Primeiro argumento do argv é o numero a se calcular o fatorial
@@ -131,10 +146,11 @@ int main(int argc, char *argv[]){
     pthread_join(t2, NULL);
     pthread_join(t3, NULL);
 
-
+    bignum final_result;
+    join_partial_results(&dt1.partial_result, &dt2.partial_result, &dt3.partial_result, &final_result);
+    
     printf("Resultado Final: \r\n");
-    // print_bignum(&result);
-    printf("%d\n\r", dt1.partial_result * dt2.partial_result * dt3.partial_result);
+    print_bignum(&final_result);
 
     return 0;
 }
