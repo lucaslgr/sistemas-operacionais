@@ -7,8 +7,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>      //para criar threads
-#include "./lib/bignum.c" //lib não nativa para utilizar o tipo bignum
+#include <pthread.h>      //Para criar threads
+#include "./lib/bignum.c" //Lib não nativa para utilizar o tipo bignum
 #include <time.h>         //Utilizada para tempo
 
 //* Estrutura que armazena os fornece e armazena os dados de cada thread
