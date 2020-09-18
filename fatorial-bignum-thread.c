@@ -36,13 +36,6 @@ void *task_thread(void *task_dt)
         inferior_limit = p_data_task->p_offsets[p_data_task->indicator_part - 1];
     }
 
-    printf(
-        "\r\n====================================Thread %d INFO====================================\n\r",
-        p_data_task->indicator_part + 1);
-    printf(
-        "Indicator %d | Upper_Limit %d | Inferior_Limit %d \n\r",
-        p_data_task->indicator_part, upper_limit, inferior_limit);
-
     for (int i = upper_limit; i > inferior_limit; i--)
     {
         bignum iterator;
@@ -55,33 +48,40 @@ void *task_thread(void *task_dt)
     }
 
     printf(
-        "Resultado parcial do fatorial pela thread %d : ",
-        p_data_task->indicator_part);
+        "\r\n====================================Thread %d INFO====================================\n\rIndicator %d | Upper_Limit %d | Inferior_Limit %d \n\rResultado parcial do fatorial pela thread %d : ",
+        p_data_task->indicator_part + 1, p_data_task->indicator_part + 1, upper_limit, inferior_limit, p_data_task->indicator_part);
     print_bignum(&p_data_task->partial_result);
     printf("\n\n\r\r");
 }
 
 //Identifica o fatorial e separa em 3 para ser calculado por cada thread
-void split_fatorial(int num, int *fac_offset)
+void split_fatorial(int num, int num_threads, int *fac_offset)
 {
     int rest;
-    rest = num % 3;
+    rest = num % num_threads;
 
     if (rest == 0)
     {
-        int offset = num / 3;
+        int offset = num / num_threads;
 
-        fac_offset[0] = offset;
-        fac_offset[1] = offset * 2;
-        fac_offset[2] = offset * 3;
+        for (int i = 1; i <= num_threads; i++)
+        {
+            fac_offset[i - 1] = offset * i;
+        }
     }
     else
     {
-        int offset = (int)num / 3;
+        int offset = (int)num / num_threads;
 
-        fac_offset[0] = offset + rest; //Adicionando o resto para completar o número quebrado
-        fac_offset[1] = fac_offset[0] + offset;
-        fac_offset[2] = fac_offset[1] + offset;
+        for (int i = 1; i <= num_threads; i++)
+        {
+            if (i == 1)
+                fac_offset[i - 1] = (offset * i) + rest; //Adicionando o resto para completar o número quebrado
+            else
+            {
+                fac_offset[i - 1] = fac_offset[i - 1 - 1] + offset;
+            }
+        }
     }
 }
 
@@ -104,11 +104,14 @@ void solve_if_small_number(int *num)
 }
 
 //Multiplica todos os resultados parciais do fatorial
-void join_partial_results(bignum *a, bignum *b, bignum *c, bignum *final_result)
+void join_partial_results(struct data_task *p_data_tasks, bignum *final_result, int num_threads)
 {
-    bignum partial_result;
-    multiply_bignum(a, b, &partial_result);
-    multiply_bignum(&partial_result, c, final_result);
+    bignum partial_result = (p_data_tasks + 0)->partial_result;
+    for (int i = 0; i < num_threads - 1; i++)
+    {
+        multiply_bignum(&partial_result, &(p_data_tasks + i + 1)->partial_result, final_result);
+        partial_result = *final_result;
+    }
 }
 
 //!OBS:
@@ -123,9 +126,12 @@ int main(int argc, char *argv[])
     //Variaveis para armazenar os clocks do processador para medir o tempo no final
     clock_t start, end;
 
+    //Variavel que armazena o numero de threads que o usuário deseja utilizar para calcular o fatorial
+    int num_threads = atoi(argv[2]);
+
+    //Variaveis que armanzenarão o numero que o usuario deseja calcular o fatorial
     bignum bignum_n;
     int num;
-
     //Convertendo de char para inteiro, agrv[1] é referente ao número para se calcular o fatorial
     num = atoi(argv[1]);
     printf("Calculando fatorial de: %d \n\r", num);
@@ -136,36 +142,61 @@ int main(int argc, char *argv[])
     //Resolvando o fatorial caso o num desejado seja 0,1 ou 2
     solve_if_small_number(&num);
 
-    //Vetor que armazena o cada número que limitara até onde cada thread deve calcular
-    int fac_offset[3];
+    //Verificando se o número que o usuário deseja calcular o fatorial é maior que o número de threads que ele deseja usar, caso seja o número de threads será setado no mesmo valor do número que se deseja calcular o fatorial
+    if (num_threads > num)
+        num_threads = num;
+
+    //Vetor que armazenará o cada número que limitara até onde cada thread deve calcular
+    int *fac_offset = (int *)malloc(sizeof(int) * num_threads);
 
     //Divindo o número em partes iguais para enviar para cada thread
-    split_fatorial(num, fac_offset);
+    split_fatorial(num, num_threads, fac_offset);
+
+    //Declarando o vetor de structs das estruturas que armazenarão os dados de resolução de cada thread
+    struct data_task *p_datatasks = (struct data_task *)malloc(sizeof(struct data_task) * num_threads);
 
     //Setando os dados de cada estrutura que cada thread vai resolver
-    struct data_task dt1, dt2, dt3;
-    dt1.indicator_part = 0;
-    dt1.p_offsets = fac_offset;
+    // struct data_task dt1, dt2, dt3;
 
-    dt2.indicator_part = 1;
-    dt2.p_offsets = fac_offset;
+    for (int i = 0; i < num_threads; i++)
+    {
+        (p_datatasks + i)->indicator_part = i;
+        (p_datatasks + i)->p_offsets = fac_offset;
+    }
 
-    dt3.indicator_part = 2;
-    dt3.p_offsets = fac_offset;
+    // dt1.indicator_part = 0;
+    // dt1.p_offsets = fac_offset;
+
+    // dt2.indicator_part = 1;
+    // dt2.p_offsets = fac_offset;
+
+    // dt3.indicator_part = 2;
+    // dt3.p_offsets = fac_offset;
 
     // declara as tarefas por thread
-    pthread_t t1, t2, t3;
+    // pthread_t t1, t2, t3;
+    pthread_t *p_threads = (pthread_t *)malloc(sizeof(pthread_t) * num_threads);
 
     // cria as tarefas
-    pthread_create(&t1, NULL, task_thread, (void *)&dt1);
-    pthread_create(&t2, NULL, task_thread, (void *)&dt2);
-    pthread_create(&t3, NULL, task_thread, (void *)&dt3);
-    pthread_join(t1, NULL);
-    pthread_join(t2, NULL);
-    pthread_join(t3, NULL);
+    for (int i = 0; i < num_threads; i++)
+    {
+        pthread_create((p_threads + i), NULL, task_thread, (void *)(p_datatasks + i));
+    }
+    // pthread_create(&t1, NULL, task_thread, (void *)&dt1);
+    // pthread_create(&t2, NULL, task_thread, (void *)&dt2);
+    // pthread_create(&t3, NULL, task_thread, (void *)&dt3);
+
+    //Coleta o dado das tarefas
+    for (int i = 0; i < num_threads; i++)
+    {
+        pthread_join(*(p_threads + i), NULL);
+    }
+    // pthread_join(t1, NULL);
+    // pthread_join(t2, NULL);
+    // pthread_join(t3, NULL);
 
     bignum final_result;
-    join_partial_results(&dt1.partial_result, &dt2.partial_result, &dt3.partial_result, &final_result);
+    join_partial_results(p_datatasks, &final_result, num_threads);
 
     //Finalizando a contagem de clocks
     end = clock();
