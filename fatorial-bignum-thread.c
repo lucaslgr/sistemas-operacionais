@@ -2,7 +2,7 @@
 *! Para compilar:
 *!  - gcc -o test fatorial-bignum-thread.c -lpthread
 *! Para executar:
-*!  - ./test <VALUE>
+*!  - ./test <VALUE TO CALCULATED THE factorial> <NUMBER OF THREADS YOU WISH TO USE>
 */
 
 #include <stdio.h>
@@ -164,17 +164,6 @@ int main(int argc, char *argv[])
         (p_datatasks + i)->p_offsets = fac_offset;
     }
 
-    // dt1.indicator_part = 0;
-    // dt1.p_offsets = fac_offset;
-
-    // dt2.indicator_part = 1;
-    // dt2.p_offsets = fac_offset;
-
-    // dt3.indicator_part = 2;
-    // dt3.p_offsets = fac_offset;
-
-    // declara as tarefas por thread
-    // pthread_t t1, t2, t3;
     pthread_t *p_threads = (pthread_t *)malloc(sizeof(pthread_t) * num_threads);
 
     // cria as tarefas
@@ -182,18 +171,12 @@ int main(int argc, char *argv[])
     {
         pthread_create((p_threads + i), NULL, task_thread, (void *)(p_datatasks + i));
     }
-    // pthread_create(&t1, NULL, task_thread, (void *)&dt1);
-    // pthread_create(&t2, NULL, task_thread, (void *)&dt2);
-    // pthread_create(&t3, NULL, task_thread, (void *)&dt3);
 
     //Coleta o dado das tarefas
     for (int i = 0; i < num_threads; i++)
     {
         pthread_join(*(p_threads + i), NULL);
     }
-    // pthread_join(t1, NULL);
-    // pthread_join(t2, NULL);
-    // pthread_join(t3, NULL);
 
     bignum final_result;
     join_partial_results(p_datatasks, &final_result, num_threads);
