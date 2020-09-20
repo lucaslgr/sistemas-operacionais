@@ -1,7 +1,5 @@
 #include "./lib/bignum.c"
 
-
-
 int main()
 {
     int n;
