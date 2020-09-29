@@ -13,9 +13,9 @@ estratégia FIFO (First In, First Out, ou o primeiro que entra
  */
 
  Struct tarefa:
-    - string // nome da tarefa
-    - contador // inicia em 0
-    - total // numero total de instruções da tarefa
+- string // nome da tarefa
+- contador // inicia em 0
+- total // numero total de instruções da tarefa
 
 /*
  * Estrutura de dados que irá armazenar as tarefas
@@ -47,7 +47,7 @@ main:
 
     while(terminadas < 5) 
         para cada tarefa t em "fila"
-                processa(tarefa[t)
+                processa(tarefa[t])
                 se t.contador == t.total
                     remova tarefa[t] // tarefas terminadas saem da fila
                     terminadas++
