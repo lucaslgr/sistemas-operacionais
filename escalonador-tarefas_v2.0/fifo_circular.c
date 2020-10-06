@@ -47,7 +47,7 @@ int incremento(struct fila_circular *p_queue, int indice)
 void insere_final(struct fila_circular *p_queue, struct tarefa val)
 {
   if (p_queue->n == p_queue->m)
-    printf("A fila esta cheia!\n\r");
+    printf("\t\t\t\tA fila esta cheia!\n\r");
   else
   {
     p_queue->x[p_queue->f] = val;
@@ -60,7 +60,7 @@ void insere_final(struct fila_circular *p_queue, struct tarefa val)
 void remove_inicio(struct fila_circular *p_queue)
 {
   if (p_queue->n == 0)
-    printf("Lista vazia!!!");
+    printf("\t\t\t\tLista vazia!!!");
   else
   {
     p_queue->c = incremento(p_queue, p_queue->c);
@@ -77,14 +77,14 @@ int get_tam(struct fila_circular *p_queue)
 //Imprime todos elementos da fila
 void imprimir_fila(struct fila_circular *p_queue)
 {
-  printf("\n\r\t\t\t\t\t====================================FILA INFO====================================\n\r");
-  printf("\t\t\t\t\tTamanho maximo 'm': %d |\n\r\t\t\t\t\tPosicao primeiro elemento 'c': %d |\n\r\t\t\t\t\tPosicao livre apos o ultimo elemento 'f': %d |\n\r\t\t\t\t\tNumero de elementos da fila 'n': %d |\n\r", p_queue->m, p_queue->c, p_queue->f, p_queue->n);
+  printf("\n\r====================================FILA INFO====================================\n\r");
+  printf("Tamanho maximo 'm': %d |\n\rPosicao primeiro elemento 'c': %d |\n\rPosicao livre apos o ultimo elemento 'f': %d |\n\rNumero de elementos da fila 'n': %d |\n\r", p_queue->m, p_queue->c, p_queue->f, p_queue->n);
 
   if (p_queue->n == 0)
     printf("\nNao ha o que imprimir, a fila esta vazia!!!\n\r");
   else
   {
-    printf("\n\r\t\t\t\t\t================================IMRPIMINDO A FILA================================\n\r\t\t\t\t\t");
+    printf("\n\r================================IMRPIMINDO A FILA================================\n\r");
 
     for (int i = 0; i < p_queue->n; i++)
     {
