@@ -5,6 +5,7 @@
 * A tarefa executa no máximo 10 ciclos por vez. 
 * Cada tarefa não pode ultrapassar o total de instruções estabelecido.
 * Se a tarefa foi finalizada retorna 1, se não retorna 0
+* Tarefas não finalizadas em 10 ciclos são recolocadas para o final da fila
 */
 int process(Task *p_task)
 {
@@ -60,7 +61,7 @@ int main()
     }
   }
 
-  // //Imprimindo a fila vazia
+  //Imprimindo a fila vazia
   // print_queue(&q);
   return 0;
 }
