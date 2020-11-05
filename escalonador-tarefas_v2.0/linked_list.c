@@ -17,12 +17,12 @@ struct linked_list
 } typedef Queue;
 
 //Construtor da fila baseada em uma estrutura de lista encadeada
-Queue queue_construct()
+Queue *queue_construct()
 {
-  Queue q;
-  q.first_no = NULL;
-  q.last_no = NULL;
-  q.qtd_nos = 0;
+  Queue *q = (Queue *)malloc(sizeof(Queue));
+  q->first_no = NULL;
+  q->last_no = NULL;
+  q->qtd_nos = 0;
   return q;
 }
 
@@ -34,8 +34,7 @@ void insert_end(Queue *q, Task t)
   //Se a lista esta vazia
   if (q->first_no == NULL)
   {
-    No *p_new_no = (No *)malloc(sizeof(No));
-    *p_new_no = no_construct(t);
+    No *p_new_no = no_construct(t);
 
     //Setando o primeiro e ultimo apontando para o ÚNICO nó criado
     q->first_no = p_new_no;
@@ -46,8 +45,7 @@ void insert_end(Queue *q, Task t)
   //Se a lista não esta vazia
   else
   {
-    No *p_new_no = (No *)malloc(sizeof(No));
-    *p_new_no = no_construct(t);
+    No *p_new_no = no_construct(t);
 
     No *p_current_last_no = q->last_no;
     q->last_no = p_new_no;
@@ -69,11 +67,16 @@ void remove_begin(Queue *q)
   }
   else
   {
+    No *p_current_first = q->first_no;
     No *p_current_second = q->first_no->next;
-    free(q->first_no);
 
     q->first_no = p_current_second;
-    q->first_no->prev = NULL;
+
+    p_current_first = NULL;
+    free(p_current_first);
+
+    if (q->first_no != NULL)
+      q->first_no->prev = NULL;
     q->qtd_nos--;
   }
 }
@@ -83,6 +86,10 @@ void remove_begin(Queue *q)
 */
 void from_begin_to_end(Queue *q)
 {
+  //Verifica se a fila possui apenas um No, se for este o caso, escapa a logica da funcao
+  if (!(q->qtd_nos > 1))
+    return;
+
   No *p_current_first_no = q->first_no;
   No *p_current_last_no = q->last_no;
 

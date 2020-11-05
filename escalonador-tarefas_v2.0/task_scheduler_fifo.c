@@ -6,6 +6,27 @@
 
 int count_cycles = 0;
 
+void system_pause()
+{
+  // char command[100];
+  // int i;
+  // scanf("%s", command);
+  // printf("Presione ENTER para continuar...");
+  // while (getchar() != '\n')
+  // {
+  //   i = 0;
+  // }
+  // getchar();
+  // return;
+  int command = -1;
+  while (command != 0)
+  {
+    printf("\n\rPresione 0 e posteriormente ENTER para continuar: ");
+    scanf("%d", &command);
+  }
+  return;
+}
+
 /*
 * Função que gerencia e imprime os MENU's
 * Retorno:
@@ -31,8 +52,10 @@ int manager_menus(int WHICH_MENU)
 
       //Verifica se o usuario digitou uma opcao invalida
       if (user_choice != 0 && user_choice != 1 && user_choice != 2)
+      {
         printf("\n\rOpcao invalida!!!\n\r Pressione Enter.\n\n\r\r");
-      getchar();
+        system_pause();
+      }
 
       //A fila inicia vazia, logo, se o usuario não desejar inserir mais tarefas inicialmente, o programa finaliza
       if (user_choice == 1 || user_choice == 2)
@@ -61,8 +84,10 @@ int manager_menus(int WHICH_MENU)
 
       //Verifica se o usuario digitou uma opcao invalida
       if (user_choice != 0 && user_choice != 1 && user_choice != 2)
+      {
         printf("\n\rOpcao invalida!!!\n\r Pressione Enter.\n\n\r\r");
-      getchar();
+        system_pause();
+      }
 
       //Se o usuario escolher a opcao de sair
       if (user_choice == 2)
@@ -88,13 +113,15 @@ int manager_menus(int WHICH_MENU)
 Task create_task_cli()
 {
   system("clear");
-  char *p_name;
+  char *p_name = (char *)malloc(50 * sizeof(char)); //50 caracateres
   int total_instructions = 0;
 
   printf("\n\r==================================CREATE TASK==================================\n\r");
   printf("\n\r- Informe o nome: ");
-  // scanf("%s", p_name); //Não funciona no Linux
-  p_name = read();
+  scanf("%s", p_name); //Não funciona no Linux
+  // fflush(stdin);
+  // p_name = read_input_string(stdin, 10);
+  // fflush(stdin);
 
   printf("\n\r- Informe o total de instrucoes da tarefa: ");
   scanf("%d", &total_instructions);
@@ -128,10 +155,12 @@ int process(Task *p_task)
     if (p_task->counter == p_task->total_instructions)
     {
       p_task->end_cycle = count_cycles;
+      system_pause();
       return 1;
     }
   }
 
+  system_pause();
   //Se não executou até o final retorna 0
   return 0;
 }
@@ -140,7 +169,7 @@ int process(Task *p_task)
 int main()
 {
   //Fila de tarefas a serem enviadas para o escalonador
-  Queue q = queue_construct();
+  Queue *q = queue_construct();
 
   //Armazena o número de tarefas atual no escalonador
   int qtd_tasks = 0;
@@ -153,27 +182,28 @@ int main()
   }
 
   //Apresenta a interface de menu para criar uma nova task ao usuario
-  insert_end(&q, create_task_cli());
+  insert_end(q, create_task_cli());
 
   //Imprimindo a fila cheia
-  print_queue(&q);
+  print_queue(q);
+  system_pause();
 
   //Armazena o número de tarefas terminadas
   int count_finished = 0;
 
-  while (q.qtd_nos > 0)
+  while (q->qtd_nos > 0)
   {
     //Passando a tarefa a ser processada e verificando se ela foi executada até o final
-    if (process(&(q.first_no->info)) == 1)
+    if (process(&(q->first_no->info)) == 1)
     {
-      remove_begin(&q);
+      remove_begin(q);
       count_finished++;
     }
     //Se a tarefa não foi processada até o final ela volta para o final da fila
     else
     {
       //Tirando a tarefa do inicio a passando para o final
-      from_begin_to_end(&q);
+      from_begin_to_end(q);
     }
 
     //Apos processar uma tarefa, apresenta-se o menu perguntando se o usuario deseja criar outra tarefa ou continuar a processar outra tarefa
@@ -181,11 +211,11 @@ int main()
     int user_choice = 1;
     while (user_choice == 1)
     {
-      user_choice = manager_menus(FIRST_MENU);
+      user_choice = manager_menus(MAIN_MENU);
       if (user_choice == 1)
       {
         //Apresenta a interface de menu para criar uma nova task ao usuario
-        insert_end(&q, create_task_cli());
+        insert_end(q, create_task_cli());
       }
     }
   }

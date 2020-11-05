@@ -15,12 +15,12 @@ struct no
 /**
  * Constroi um No que armazena uma task e o retorna 
 */
-No no_construct(Task t)
+No *no_construct(Task t)
 {
-  No n;
-  n.info = t;
-  n.next = NULL;
-  n.prev = NULL;
+  No *n = (No *)malloc(sizeof(No));
+  n->info = t;
+  n->next = NULL;
+  n->prev = NULL;
   return n;
 }
 
