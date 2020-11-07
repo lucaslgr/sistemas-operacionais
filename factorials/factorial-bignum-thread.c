@@ -119,7 +119,7 @@ void join_partial_results(struct data_task *p_data_tasks, bignum *final_result, 
 //!Segundo argumento do argv é o numero de threads que serão utilizadas para o calculo
 int main(int argc, char *argv[])
 {
-    //===================================<CÁLCULO DO FATORIAL COM BIGNUM>===================================
+    //===================================<CÁLCULO DO FATORIAL COM BIGNUM USANDO THREADS>===================================
     //pritnf("Informe o numero que deseja calcular o fatorial: ");
     //scanf("%d", &num);
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     if (num_threads > num)
         num_threads = num;
 
-    //Vetor que armazenará o cada número que limitara até onde cada thread deve calcular
+    //Vetor que armazenará cada número que limitara até onde cada thread deve calcular
     int *fac_offset = (int *)malloc(sizeof(int) * num_threads);
 
     //Divindo o número em partes iguais para enviar para cada thread
